@@ -1,19 +1,40 @@
-# Hoi Software
+# Leaklight — House of Intelligence
 
-Een takenbeheer-webapplicatie met een React + TypeScript frontend en een Node.js/Express backend.
+Premielek-detectie tijdens polisconversie: laad een portefeuille-export, toets elke
+polis aan het normprofiel en rol dekkingsgaten eruit als concrete cross- en
+upsell-leads. De applicatie achter de website van House of Intelligence B.V.
 
-## Functionaliteit
+## Wat het doet
 
-- Taken toevoegen met een titel en optionele notitie
-- Taken afvinken, filteren (alle / open / klaar) en verwijderen
-- Taken worden op de server bewaard in `server/data/tasks.json`
-- Nederlandstalige interface met licht/donker thema (volgt je systeeminstelling)
+1. **Portefeuille erin** — upload een CSV-export (zoals uit ANVA/Level, CCS of
+   Progress OpenEdge), of scan de meegeleverde demo-portefeuille van 48 klanten.
+2. **Scan** — elke polis wordt getoetst aan een normprofiel:
+   - *Particulier*: per productlijn (opstal, inboedel, AVP, rechtsbijstand, auto).
+   - *Zakelijk*: normprofiel per SBI-hoofdgroep (gebouw, inventaris,
+     bedrijfsschade, AVB, rechtsbijstand, cyber).
+3. **Leads eruit** — per klant: welk gat, welk product, welke geschatte
+   jaarpremie. Dashboard met lek-scores en verdeling per lek-type, plus een
+   CSV-export klaar voor de migratiebrief of het CRM.
+
+### De lek-types
+
+| Lek | Kans |
+| --- | --- |
+| Ontbrekende rechtsbijstand | Cross-sell |
+| Onderverzekering (som < 90% van actuele waarde) | Upsell |
+| Losse opstal zonder inboedel (of andersom) | Cross-sell |
+| Geen aansprakelijkheid (AVP) | Cross-sell |
+| Dubbele dekking | Optimalisatie |
+| Verouderd risico (10+ jaar niet aangepast) | Upsell |
+| Ontbrekende branchedekking (zakelijk, per SBI) | Cross-sell |
+
+Portefeuilles worden niet opgeslagen: scans draaien volledig in het geheugen.
 
 ## Structuur
 
 ```
-client/   React + TypeScript frontend (Vite)
-server/   Express REST API + JSON-opslag
+client/   React + TypeScript frontend (Vite), in de Leaklight-huisstijl
+server/   Express REST API met de scan-engine (normprofielen, scanner, CSV)
 ```
 
 ## Aan de slag
@@ -33,18 +54,33 @@ Open daarna http://localhost:5173.
 
 ```bash
 npm run build   # bouwt de frontend naar client/dist
-npm start       # Express serveert de API én de gebouwde frontend op poort 3001
+npm start       # Express serveert de API én de frontend op poort 3001
 ```
+
+## CSV-formaat
+
+Eén regel per polis, scheidingsteken `;` of `,`. Nederlandse getalnotatie
+(`310.000,00`) wordt herkend.
+
+```csv
+klant_id;klant_naam;segment;sbi_code;polisnummer;productlijn;verzekerde_som;actuele_waarde;jaarpremie;laatst_gewijzigd
+K1001;Jan de Vries;particulier;;P100234;opstal;310000;405000;245;2014-03-12
+Z2004;Grand Café De Markt;zakelijk;5630;P200871;avb;;;540;2022-06-15
+```
+
+Verplichte kolommen: `klant_id`, `klant_naam`, `segment`, `polisnummer`,
+`productlijn`. Productlijnen — particulier: `opstal`, `inboedel`, `avp`,
+`rechtsbijstand`, `auto`; zakelijk: `gebouw`, `inventaris`, `bedrijfsschade`,
+`avb`, `rechtsbijstand`, `cyber`.
 
 ## API
 
-| Methode | Pad              | Omschrijving                     |
-| ------- | ---------------- | -------------------------------- |
-| GET     | `/api/health`    | Statuscheck                      |
-| GET     | `/api/tasks`     | Alle taken ophalen               |
-| POST    | `/api/tasks`     | Taak aanmaken (`title`, `notes`) |
-| PATCH   | `/api/tasks/:id` | Taak bijwerken                   |
-| DELETE  | `/api/tasks/:id` | Taak verwijderen                 |
+| Methode | Pad | Omschrijving |
+| ------- | --- | ------------ |
+| GET | `/api/health` | Statuscheck |
+| POST | `/api/scan` | Scan een CSV (raw `text/csv`-body of JSON `{ "csv": "..." }`) |
+| POST | `/api/scan/demo` | Scan de demo-portefeuille |
+| GET | `/api/scans/:id/leads.csv` | Exporteer de leads van een scan als CSV |
 
 ## Tests
 
@@ -52,4 +88,5 @@ npm start       # Express serveert de API én de gebouwde frontend op poort 3001
 npm test
 ```
 
-Draait de API-tests van de server (Node's ingebouwde testrunner).
+Dekt de scan-regels (alle lek-types, particulier en zakelijk), de CSV-parser en
+de API-endpoints via Node's ingebouwde testrunner.

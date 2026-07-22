@@ -1,24 +1,27 @@
-:root {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #1c2333;
-  --muted: #6b7280;
-  --accent: #4f6df5;
-  --accent-soft: #e6ebff;
-  --danger: #d64545;
-  --border: #e3e6ef;
-}
+/* Leaklight — design-tokens overgenomen van de House of Intelligence-website:
+   licht cloud-wit canvas, witte kaarten, één periwinkle accent; coral = lek
+   gevonden, mint = gedekt. Pill-buttons en violet-getinte schaduwen. */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12141c;
-    --card: #1c1f2b;
-    --text: #eef0f6;
-    --muted: #9aa1b5;
-    --accent: #7d94ff;
-    --accent-soft: #2a3150;
-    --border: #2b3040;
-  }
+:root {
+  --periwinkle: #576cdb;
+  --periwinkle-deep: #4a5cc4;
+  --indigo-ink: #1f1f47;
+  --storm: #3d3d5c;
+  --fog: #626d88;
+  --cloud: #f9f9fb;
+  --paper: #ffffff;
+  --mist: #eaedf6;
+  --lilac: #d6dbf5;
+  --periwinkle-mist: #c1c9f6;
+  --coral: #f25a5a;
+  --coral-blush: #f7d4d4;
+  --mint: #a6f2d2;
+  --mint-veil: #c1f6e0;
+  --mint-deep: #2f8f6b;
+  --bone: #e3e6e8;
+  --shadow-float: rgba(73, 46, 107, 0.14) 0px 3px 16px 0px;
+  --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, sans-serif;
 }
 
 * {
@@ -27,169 +30,499 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--cloud);
+  color: var(--storm);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
-.app {
-  max-width: 640px;
+h1,
+h2,
+h3,
+button,
+.display {
+  font-family: var(--font-display);
+  color: var(--indigo-ink);
+}
+
+::selection {
+  background: var(--periwinkle-mist);
+  color: var(--indigo-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.shell {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 1.25rem 4rem;
+  padding: 0 24px 96px;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 2.2rem;
-}
-
-.accent {
-  color: var(--accent);
-}
-
-.subtitle {
-  margin: 0.35rem 0 1.75rem;
-  color: var(--muted);
-}
-
-.new-task {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.new-task input {
-  padding: 0.65rem 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card);
-  color: var(--text);
-  font-size: 0.95rem;
-}
-
-.new-task input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-}
-
-.new-task button {
-  padding: 0.65rem 1.1rem;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-}
-
-.new-task button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error {
-  color: var(--danger);
-  margin: 0.5rem 0;
-}
-
-.filters {
-  display: flex;
-  gap: 0.4rem;
-  margin: 1rem 0;
-}
-
-.filters button {
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--muted);
-}
-
-.filters button.active {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.tasks {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tasks li {
+/* ---------- Topbalk ---------- */
+.topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.75rem 0.9rem;
+  padding: 22px 0;
 }
 
-.tasks label {
+.brand {
   display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand .logo {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--indigo-ink);
+}
+
+.brand .logo .accent {
+  color: var(--periwinkle);
+}
+
+.brand .sub {
+  font-size: 0.8rem;
+  color: var(--fog);
+}
+
+/* ---------- Knoppen (pills, zoals op de site) ---------- */
+.btn {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  flex: 1;
+  gap: 8px;
+  border: none;
+  border-radius: 9999px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--periwinkle);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--periwinkle-deep);
+}
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--indigo-ink);
+  border: 1px solid var(--mist);
+}
+
+.btn-secondary:hover {
+  border-color: var(--lilac);
+  box-shadow: var(--shadow-float);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+/* ---------- Startscherm ---------- */
+.hero {
+  text-align: center;
+  max-width: 720px;
+  margin: 48px auto 40px;
+}
+
+.kicker {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--periwinkle-deep);
+}
+
+.hero h1 {
+  margin: 14px 0 0;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.hero p {
+  margin-top: 18px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--storm);
+}
+
+.start-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.card h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  margin: 0 0 20px;
+  line-height: 1.55;
+  color: var(--storm);
+}
+
+.dropzone {
+  border: 2px dashed var(--lilac);
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--fog);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone:hover,
+.dropzone.actief {
+  border-color: var(--periwinkle);
+  background: var(--cloud);
+}
+
+.formaat {
+  margin-top: 28px;
+  font-size: 0.85rem;
+  color: var(--fog);
+}
+
+.formaat code {
+  display: block;
+  margin-top: 10px;
+  padding: 14px 16px;
+  background: var(--cloud);
+  border: 1px solid var(--mist);
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 0.78rem;
+  color: var(--storm);
+}
+
+.fout {
+  margin: 20px auto;
+  max-width: 720px;
+  background: var(--coral-blush);
+  color: #8f2525;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+/* ---------- Dashboard ---------- */
+.dash-kop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.dash-kop h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.dash-kop .acties {
+  display: flex;
+  gap: 10px;
+}
+
+.tegels {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.tegel {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
+.tegel .label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fog);
+}
+
+.tegel .waarde {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--indigo-ink);
+}
+
+.tegel.omzet .waarde {
+  color: var(--periwinkle-deep);
+}
+
+/* Verdeling per lek-type */
+.verdeling {
+  margin-top: 24px;
+}
+
+.verdeling h2,
+.sectie h2 {
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+
+.balk-rij {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--mist);
+  font-size: 0.9rem;
+}
+
+.balk-rij:last-child {
+  border-bottom: none;
+}
+
+.balk-spoor {
+  height: 10px;
+  background: var(--cloud);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.balk {
+  height: 100%;
+  background: var(--periwinkle);
+  border-radius: 999px;
+}
+
+.balk-rij .aantal {
+  color: var(--fog);
+  white-space: nowrap;
+}
+
+.balk-rij .premie {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--indigo-ink);
+  white-space: nowrap;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 3px 12px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--indigo-ink);
+  white-space: nowrap;
+}
+
+.badge.cross-sell {
+  background: var(--periwinkle-mist);
+}
+
+.badge.upsell {
+  background: var(--mint-veil);
+}
+
+.badge.optimalisatie {
+  background: var(--bone);
+}
+
+.badge.segment {
+  background: var(--cloud);
+  border: 1px solid var(--mist);
+  color: var(--fog);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 28px 0 16px;
+}
+
+.seg-groep {
+  display: inline-flex;
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 9999px;
+  padding: 4px;
+}
+
+.seg-groep button {
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fog);
   cursor: pointer;
 }
 
-.tasks input[type='checkbox'] {
-  width: 1.15rem;
-  height: 1.15rem;
-  accent-color: var(--accent);
+.seg-groep button.actief {
+  background: var(--lilac);
+  color: var(--indigo-ink);
 }
 
-.tasks .title {
-  display: block;
-  font-weight: 500;
+/* Leads-tabel */
+.tabel-wrap {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  overflow-x: auto;
 }
 
-.tasks .notes {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--muted);
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-.tasks li.done .title {
-  text-decoration: line-through;
-  color: var(--muted);
+th {
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fog);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--mist);
+  white-space: nowrap;
 }
 
-.delete {
-  border: none;
-  background: none;
-  color: var(--muted);
-  font-size: 1rem;
-  padding: 0.25rem 0.4rem;
-  border-radius: 8px;
+td {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--mist);
+  vertical-align: top;
 }
 
-.delete:hover {
-  color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
+tr:last-child td {
+  border-bottom: none;
 }
 
-.empty {
-  color: var(--muted);
+td.premie {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--indigo-ink);
+  white-space: nowrap;
+  text-align: right;
+}
+
+th.premie {
+  text-align: right;
+}
+
+.klantnaam {
+  font-weight: 600;
+  color: var(--indigo-ink);
+}
+
+.klantid {
+  font-size: 0.78rem;
+  color: var(--fog);
+}
+
+.omschrijving {
+  max-width: 420px;
+  line-height: 1.45;
+}
+
+/* Lek-score klantenlijst */
+.score-rij {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--mist);
+  font-size: 0.9rem;
+}
+
+.score-rij:last-child {
+  border-bottom: none;
+}
+
+.score-spoor {
+  height: 10px;
+  background: var(--mint-veil);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.score-balk {
+  height: 100%;
+  background: var(--coral);
+  border-radius: 999px;
+}
+
+.score-rij .score {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--indigo-ink);
+  min-width: 3ch;
+  text-align: right;
+}
+
+.sectie {
+  margin-top: 32px;
+}
+
+.leeg {
+  padding: 32px;
   text-align: center;
-  padding: 2rem 0;
+  color: var(--fog);
 }
 
-@media (max-width: 560px) {
-  .new-task {
-    grid-template-columns: 1fr;
-  }
+.voet {
+  margin-top: 48px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--fog);
 }

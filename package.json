@@ -1,8 +1,8 @@
 {
-  "name": "hoisoftware",
+  "name": "leaklight",
   "version": "1.0.0",
   "private": true,
-  "description": "Hoi Software - takenbeheer webapplicatie (React + Express)",
+  "description": "Leaklight - premielek-detectie tijdens polisconversie (House of Intelligence)",
   "workspaces": [
     "client",
     "server"

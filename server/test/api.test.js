@@ -1,63 +1,60 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import path from 'node:path';
-import os from 'node:os';
-import { mkdtemp } from 'node:fs/promises';
 import { createApp } from '../src/app.js';
-import { TaskStore } from '../src/store.js';
 
 async function makeServer() {
-  const dir = await mkdtemp(path.join(os.tmpdir(), 'hoi-test-'));
-  const store = new TaskStore(path.join(dir, 'tasks.json'));
-  await store.load();
-  const app = createApp(store);
+  const app = createApp();
   const server = app.listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
-  const base = `http://localhost:${server.address().port}`;
-  return { server, base };
+  return { server, base: `http://localhost:${server.address().port}` };
 }
 
-test('taken aanmaken, bijwerken en verwijderen', async (t) => {
+test('demo-scan en CSV-export via de API', async (t) => {
   const { server, base } = await makeServer();
   t.after(() => server.close());
 
-  let res = await fetch(`${base}/api/tasks`);
-  assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), []);
-
-  res = await fetch(`${base}/api/tasks`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: 'Eerste taak', notes: 'test' }),
-  });
+  const res = await fetch(`${base}/api/scan/demo`, { method: 'POST' });
   assert.equal(res.status, 201);
-  const task = await res.json();
-  assert.equal(task.title, 'Eerste taak');
-  assert.equal(task.done, false);
+  const scan = await res.json();
+  assert.ok(scan.scanId);
+  assert.ok(scan.totalen.leks > 0);
+  assert.ok(Array.isArray(scan.leads));
 
-  res = await fetch(`${base}/api/tasks/${task.id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ done: true }),
-  });
-  assert.equal(res.status, 200);
-  assert.equal((await res.json()).done, true);
-
-  res = await fetch(`${base}/api/tasks/${task.id}`, { method: 'DELETE' });
-  assert.equal(res.status, 204);
-
-  res = await fetch(`${base}/api/tasks`);
-  assert.deepEqual(await res.json(), []);
+  const csvRes = await fetch(`${base}/api/scans/${scan.scanId}/leads.csv`);
+  assert.equal(csvRes.status, 200);
+  const csv = await csvRes.text();
+  assert.match(csv.split('\n')[0], /^klant_id;klant_naam/);
+  assert.equal(csv.split('\n').length, scan.leads.length + 1);
 });
 
-test('lege titel wordt geweigerd', async (t) => {
+test('CSV-upload wordt gescand, ongeldige invoer geeft 400', async (t) => {
   const { server, base } = await makeServer();
   t.after(() => server.close());
 
-  const res = await fetch(`${base}/api/tasks`, {
+  const csv = [
+    'klant_id;klant_naam;segment;sbi_code;polisnummer;productlijn;verzekerde_som;actuele_waarde;jaarpremie;laatst_gewijzigd',
+    'K1;Jan de Vries;particulier;;P1;opstal;400000;400000;240;2024-03-01',
+  ].join('\n');
+
+  let res = await fetch(`${base}/api/scan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/csv' },
+    body: csv,
+  });
+  assert.equal(res.status, 201);
+  const scan = await res.json();
+  assert.equal(scan.totalen.klanten, 1);
+  // Opstal zonder inboedel, rechtsbijstand en AVP: drie leks.
+  assert.equal(scan.totalen.leks, 3);
+
+  res = await fetch(`${base}/api/scan`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: '   ' }),
+    body: JSON.stringify({ csv: 'kolom_a;kolom_b\n1;2' }),
   });
   assert.equal(res.status, 400);
+  assert.match((await res.json()).error, /Verplichte kolommen/);
+
+  res = await fetch(`${base}/api/scans/bestaat-niet/leads.csv`);
+  assert.equal(res.status, 404);
 });
