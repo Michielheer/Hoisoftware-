@@ -635,6 +635,10 @@ html.js .reveal.is-visible {
   color: var(--periwinkle-deep);
 }
 
+.tegel.gerealiseerd .waarde {
+  color: var(--mint-deep);
+}
+
 /* Verdeling per lek-type */
 .balk-rij {
   display: grid;
@@ -826,6 +830,68 @@ td.premie {
   color: var(--indigo-ink);
   min-width: 3ch;
   text-align: right;
+}
+
+/* Status-dropdown: pill in site-stijl, met een pastel wash per fase */
+.status-select {
+  appearance: none;
+  border: 1px solid var(--mist);
+  border-radius: 9999px;
+  padding: 7px 30px 7px 14px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--indigo-ink);
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23626d88' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+
+.status-select:hover {
+  border-color: var(--lilac);
+}
+
+.status-select.status-benaderd,
+.status-select.status-offerte {
+  background-color: var(--lilac);
+}
+
+.status-select.status-gesloten {
+  background-color: var(--mint-veil);
+}
+
+.status-select.status-afgewezen {
+  background-color: var(--bone);
+  color: var(--fog);
+}
+
+tbody tr.afgewezen td {
+  opacity: 0.55;
+}
+
+/* Eerdere scans op het startscherm */
+.scan-rij {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--mist);
+  font-size: 0.9rem;
+}
+
+.scan-rij:last-child {
+  border-bottom: none;
+}
+
+.scan-opvolging .gerealiseerd {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--mint-deep);
+  white-space: nowrap;
 }
 
 .score-acties {

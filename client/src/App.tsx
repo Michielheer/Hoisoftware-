@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, ScanResultaat } from './api';
+import { api, ScanResultaat, ScanSamenvatting } from './api';
 import Dashboard from './components/Dashboard';
 import Logo from './components/Logo';
 import Start from './components/Start';
@@ -7,11 +7,21 @@ import { initEffects } from './effects';
 
 export default function App() {
   const [scan, setScan] = useState<ScanResultaat | null>(null);
+  const [eerdere, setEerdere] = useState<ScanSamenvatting[]>([]);
   const [bezig, setBezig] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
 
   // Scroll-reveal en kaart-tilt opnieuw koppelen na elke view-wissel.
-  useEffect(() => initEffects(), [scan, fout]);
+  useEffect(() => initEffects(), [scan, fout, eerdere]);
+
+  // Bewaarde scans ophalen bij de start en bij terugkeer naar het startscherm.
+  useEffect(() => {
+    if (scan) return;
+    api
+      .lijst()
+      .then(setEerdere)
+      .catch(() => setEerdere([]));
+  }, [scan]);
 
   async function voerUit(actie: () => Promise<ScanResultaat>) {
     setBezig(true);
@@ -62,9 +72,15 @@ export default function App() {
         )}
 
         {scan ? (
-          <Dashboard scan={scan} onNieuweScan={() => setScan(null)} />
+          <Dashboard scan={scan} onScanUpdate={setScan} onNieuweScan={() => setScan(null)} />
         ) : (
-          <Start bezig={bezig} onCsv={(csv) => voerUit(() => api.scanCsv(csv))} onDemo={() => voerUit(() => api.scanDemo())} />
+          <Start
+            bezig={bezig}
+            eerdere={eerdere}
+            onCsv={(csv) => voerUit(() => api.scanCsv(csv))}
+            onDemo={() => voerUit(() => api.scanDemo())}
+            onOpen={(scanId) => voerUit(() => api.open(scanId))}
+          />
         )}
       </main>
 
@@ -87,7 +103,7 @@ export default function App() {
           </div>
           <div className="footer-meta">
             <p style={{ margin: 0 }}>
-              Leaklight — de scan draait in het geheugen; portefeuilles worden niet opgeslagen.
+              Leaklight — scanresultaten en opvolging worden bewaard; de ruwe portefeuille zelf niet.
               <br />
               <a href="mailto:info@houseofintelligence.nl">info@houseofintelligence.nl</a>
               {' · '}

@@ -11,11 +11,31 @@ export interface Lek {
   geschatteJaarpremie: number;
 }
 
+export type LeadStatus = 'nieuw' | 'benaderd' | 'offerte' | 'gesloten' | 'afgewezen';
+
+export const LEAD_STATUSSEN: LeadStatus[] = ['nieuw', 'benaderd', 'offerte', 'gesloten', 'afgewezen'];
+
 export interface Lead extends Lek {
+  leadId: string;
+  status: LeadStatus;
   klantId: string;
   klantNaam: string;
   segment: Segment;
   sbiCode: string | null;
+}
+
+export interface Opvolging {
+  telling: Record<LeadStatus, number>;
+  gerealiseerd: number;
+  inBehandeling: number;
+}
+
+export interface ScanSamenvatting {
+  scanId: string;
+  bron: 'upload' | 'demo';
+  aangemaakt: string;
+  totalen: ScanResultaat['totalen'];
+  opvolging: Opvolging;
 }
 
 export interface KlantResultaat {
@@ -88,6 +108,19 @@ export const api = {
     }).then((r) => handle<ScanResultaat>(r)),
 
   scanDemo: () => fetch('/api/scan/demo', { method: 'POST' }).then((r) => handle<ScanResultaat>(r)),
+
+  lijst: () => fetch('/api/scans').then((r) => handle<ScanSamenvatting[]>(r)),
+
+  open: (scanId: string) => fetch(`/api/scans/${scanId}`).then((r) => handle<ScanResultaat>(r)),
+
+  zetStatus: (scanId: string, leadId: string, status: LeadStatus) =>
+    fetch(`/api/scans/${scanId}/leads/${leadId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).then((r) => handle<ScanResultaat>(r)),
+
+  brievenUrl: (scanId: string) => `/api/scans/${scanId}/brieven`,
 
   exportUrl: (scanId: string) => `/api/scans/${scanId}/leads.csv`,
 

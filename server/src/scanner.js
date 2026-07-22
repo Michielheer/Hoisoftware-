@@ -244,7 +244,9 @@ export function scanPortefeuille(klanten, opties = {}) {
   }
 
   const leads = resultaatKlanten.flatMap((k) =>
-    k.leks.map((l) => ({
+    k.leks.map((l, i) => ({
+      leadId: `${k.klantId}-${i}`,
+      status: 'nieuw',
       klantId: k.klantId,
       klantNaam: k.klantNaam,
       segment: k.segment,

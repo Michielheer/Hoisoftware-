@@ -1,21 +1,47 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { api, euro, Kans, ScanResultaat, Segment } from '../api';
+import { api, euro, Kans, LEAD_STATUSSEN, LeadStatus, ScanResultaat, Segment } from '../api';
 import CoverageBars from './CoverageBars';
 import ScanCanvas from './ScanCanvas';
 
 type SegmentFilter = 'alle' | Segment;
 type KansFilter = 'alle' | Kans;
+type StatusFilter = 'alle' | 'open' | 'lopend' | 'gesloten' | 'afgewezen';
 
 const badgeClass = (kind: Kans) => `badge ${kind.toLowerCase()}`;
 
+const STATUS_LABEL: Record<LeadStatus, string> = {
+  nieuw: 'Nieuw',
+  benaderd: 'Benaderd',
+  offerte: 'Offerte',
+  gesloten: 'Gesloten',
+  afgewezen: 'Afgewezen',
+};
+
+const matchtStatus = (status: LeadStatus, filter: StatusFilter) => {
+  if (filter === 'alle') return true;
+  if (filter === 'open') return status === 'nieuw';
+  if (filter === 'lopend') return status === 'benaderd' || status === 'offerte';
+  return status === filter;
+};
+
 interface Props {
   scan: ScanResultaat;
+  onScanUpdate: (scan: ScanResultaat) => void;
   onNieuweScan: () => void;
 }
 
-export default function Dashboard({ scan, onNieuweScan }: Props) {
+export default function Dashboard({ scan, onScanUpdate, onNieuweScan }: Props) {
   const [segment, setSegment] = useState<SegmentFilter>('alle');
   const [kans, setKans] = useState<KansFilter>('alle');
+  const [status, setStatus] = useState<StatusFilter>('alle');
+
+  async function wijzigStatus(leadId: string, nieuweStatus: LeadStatus) {
+    try {
+      onScanUpdate(await api.zetStatus(scan.scanId, leadId, nieuweStatus));
+    } catch {
+      // Bij een fout blijft de oude status staan; de volgende fetch herstelt de waarheid.
+    }
+  }
   const [runId, setRunId] = useState(0);
   const statRefs = useRef<Array<HTMLParagraphElement | null>>([]);
 
@@ -44,10 +70,21 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
   const leads = useMemo(
     () =>
       scan.leads.filter(
-        (l) => (segment === 'alle' || l.segment === segment) && (kans === 'alle' || l.kind === kans),
+        (l) =>
+          (segment === 'alle' || l.segment === segment) &&
+          (kans === 'alle' || l.kind === kans) &&
+          matchtStatus(l.status, status),
       ),
-    [scan, segment, kans],
+    [scan, segment, kans, status],
   );
+
+  // Opvolging: wat de scan belooft (geschat) naast wat er al binnen is.
+  const gerealiseerd = scan.leads
+    .filter((l) => l.status === 'gesloten')
+    .reduce((s, l) => s + l.geschatteJaarpremie, 0);
+  const inBehandeling = scan.leads
+    .filter((l) => l.status === 'benaderd' || l.status === 'offerte')
+    .reduce((s, l) => s + l.geschatteJaarpremie, 0);
 
   const klanten = useMemo(
     () => scan.klanten.filter((k) => (segment === 'alle' || k.segment === segment) && k.lekScore > 0),
@@ -65,6 +102,12 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
           <h1 className="display-lg">Dezelfde migratie, maar nu rolt eruit wat mist.</h1>
         </div>
         <div className="dash-acties">
+          <a className="btn-ghost" href={api.brievenUrl(scan.scanId)} download title="Alle conceptbrieven in één bestand">
+            Alle brieven
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 4h16v16H4zM4 7l8 6 8-6" />
+            </svg>
+          </a>
           <a className="btn-ghost" href={api.exportUrl(scan.scanId)} download>
             Exporteer leads (CSV)
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -100,6 +143,14 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
         <div className="tegel omzet reveal">
           <p className="label">Geschatte jaaromzet</p>
           <p className="waarde">{euro(scan.totalen.geschatteJaarpremie)}</p>
+        </div>
+        <div className="tegel reveal">
+          <p className="label">In behandeling</p>
+          <p className="waarde">{euro(inBehandeling)}</p>
+        </div>
+        <div className="tegel gerealiseerd reveal">
+          <p className="label">Gerealiseerd</p>
+          <p className="waarde">{euro(gerealiseerd)}</p>
         </div>
       </div>
 
@@ -261,6 +312,21 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
               </button>
             ))}
           </div>
+          <div className="seg-groep" role="group" aria-label="Filter op opvolgstatus">
+            {(
+              [
+                ['alle', 'Alle statussen'],
+                ['open', 'Nog niet opgepakt'],
+                ['lopend', 'In behandeling'],
+                ['gesloten', 'Gesloten'],
+                ['afgewezen', 'Afgewezen'],
+              ] as [StatusFilter, string][]
+            ).map(([s, label]) => (
+              <button key={s} className="seg-btn" aria-pressed={status === s} onClick={() => setStatus(s)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="tabel-wrap reveal">
@@ -276,11 +342,12 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
                   <th>Product</th>
                   <th>Toelichting</th>
                   <th className="premie">Jaarpremie</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {leads.map((l, i) => (
-                  <tr key={`${l.klantId}-${l.type}-${l.productlijn}-${i}`}>
+                {leads.map((l) => (
+                  <tr key={l.leadId} className={l.status === 'afgewezen' ? 'afgewezen' : ''}>
                     <td>
                       <span className="klantnaam">{l.klantNaam}</span>
                       <br />
@@ -296,6 +363,20 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
                     <td>{l.product}</td>
                     <td className="omschrijving">{l.omschrijving}</td>
                     <td className="premie">{euro(l.geschatteJaarpremie)}</td>
+                    <td>
+                      <select
+                        className={`status-select status-${l.status}`}
+                        value={l.status}
+                        onChange={(e) => wijzigStatus(l.leadId, e.target.value as LeadStatus)}
+                        aria-label={`Status van lead ${l.naam} voor ${l.klantNaam}`}
+                      >
+                        {LEAD_STATUSSEN.map((s) => (
+                          <option key={s} value={s}>
+                            {STATUS_LABEL[s]}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                   </tr>
                 ))}
               </tbody>

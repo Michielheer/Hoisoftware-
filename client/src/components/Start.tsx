@@ -1,4 +1,5 @@
 import { DragEvent, useCallback, useRef, useState } from 'react';
+import { euro, ScanSamenvatting } from '../api';
 import ScanCanvas, { demoCellen } from './ScanCanvas';
 
 const VOORBEELD = `klant_id;klant_naam;segment;sbi_code;polisnummer;productlijn;verzekerde_som;actuele_waarde;jaarpremie;laatst_gewijzigd
@@ -15,11 +16,13 @@ const STATS = [
 
 interface Props {
   bezig: boolean;
+  eerdere: ScanSamenvatting[];
   onCsv: (csv: string) => void;
   onDemo: () => void;
+  onOpen: (scanId: string) => void;
 }
 
-export default function Start({ bezig, onCsv, onDemo }: Props) {
+export default function Start({ bezig, eerdere, onCsv, onDemo, onOpen }: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
   const statRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const [sleep, setSleep] = useState(false);
@@ -114,8 +117,8 @@ export default function Start({ bezig, onCsv, onDemo }: Props) {
           <p className="kicker">Portefeuille erin</p>
           <h2 className="display-lg">Het formaat dat je toch al hebt voor de conversie.</h2>
           <p className="lede" style={{ marginTop: 20 }}>
-            Export uit ANVA/Level, CCS of Progress OpenEdge als CSV. Er wordt niets opgeslagen: de
-            scan draait volledig in het geheugen.
+            Export uit ANVA/Level, CCS of Progress OpenEdge als CSV. De ruwe portefeuille wordt niet
+            opgeslagen — alleen het scanresultaat, zodat je de opvolging kunt bijhouden.
           </p>
         </div>
 
@@ -160,6 +163,45 @@ export default function Start({ bezig, onCsv, onDemo }: Props) {
           gebouw, inventaris, bedrijfsschade, avb, rechtsbijstand, cyber.
         </div>
       </section>
+
+      {/* Eerdere scans: opvolging loopt door over sessies heen */}
+      {eerdere.length > 0 && (
+        <section className="container" style={{ paddingTop: 56 }}>
+          <div className="sectie-kop reveal" style={{ margin: '0 auto', textAlign: 'center' }}>
+            <p className="kicker">Eerdere scans</p>
+            <h2 className="display-lg">Pak de opvolging weer op.</h2>
+          </div>
+          <div className="card reveal" style={{ marginTop: 40, maxWidth: 860, marginLeft: 'auto', marginRight: 'auto' }}>
+            {eerdere.map((s) => (
+              <div className="scan-rij" key={s.scanId}>
+                <span>
+                  <span className="klantnaam">
+                    {new Date(s.aangemaakt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>{' '}
+                  <span className="badge segment">{s.bron === 'demo' ? 'demo' : 'upload'}</span>
+                  <br />
+                  <span className="klantid">
+                    {s.totalen.klanten} klanten · {s.totalen.leks} leks · {euro(s.totalen.geschatteJaarpremie)} geschat
+                  </span>
+                </span>
+                <span className="scan-opvolging">
+                  {s.opvolging.gerealiseerd > 0 ? (
+                    <span className="gerealiseerd">{euro(s.opvolging.gerealiseerd)} gerealiseerd</span>
+                  ) : (
+                    <span className="klantid">{s.opvolging.telling.nieuw} leads nog niet opgepakt</span>
+                  )}
+                </span>
+                <button className="btn-ghost" onClick={() => onOpen(s.scanId)} disabled={bezig}>
+                  openen
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

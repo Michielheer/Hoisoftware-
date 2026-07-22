@@ -33,7 +33,14 @@ en het zakelijke staafdiagram met de dekking naast het normprofiel per SBI.
 | Verouderd risico (10+ jaar niet aangepast) | Upsell |
 | Ontbrekende branchedekking (zakelijk, per SBI) | Cross-sell |
 
-Portefeuilles worden niet opgeslagen: scans draaien volledig in het geheugen.
+### Opvolging
+
+Scans worden bewaard (in `server/data/scans.json`; de ruwe portefeuille zelf
+wordt nooit opgeslagen). Elke lead heeft een opvolgstatus — nieuw → benaderd →
+offerte → gesloten/afgewezen — en het dashboard zet de gerealiseerde en lopende
+jaarpremie naast de geschatte omzet. Vanaf het startscherm pak je een eerdere
+scan weer op. Voor campagnes zijn alle conceptbrieven in één keer te
+downloaden.
 
 ## Structuur
 
@@ -86,7 +93,11 @@ Verplichte kolommen: `klant_id`, `klant_naam`, `segment`, `polisnummer`,
 | POST | `/api/scan` | Scan een CSV (raw `text/csv`-body of JSON `{ "csv": "..." }`) |
 | POST | `/api/scan/demo` | Scan de demo-portefeuille |
 | GET | `/api/scans/:id/leads.csv` | Exporteer de leads van een scan als CSV |
+| GET | `/api/scans` | Lijst van bewaarde scans met opvolg-samenvatting |
+| GET | `/api/scans/:id` | Eén bewaarde scan openen |
+| PATCH | `/api/scans/:id/leads/:leadId` | Opvolgstatus van een lead bijwerken (`{ "status": "gesloten" }`) |
 | GET | `/api/scans/:id/klanten/:klantId/brief` | Conceptbrief (migratiebrief) voor één klant |
+| GET | `/api/scans/:id/brieven` | Alle conceptbrieven in één bestand (campagne) |
 
 ## Tests
 
