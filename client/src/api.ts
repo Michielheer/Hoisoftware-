@@ -37,10 +37,16 @@ export interface LekTypeTotaal {
   geschatteJaarpremie: number;
 }
 
+export interface ScanCel {
+  label: string;
+  leak: boolean;
+}
+
 export interface ScanResultaat {
   scanId: string;
   bron: 'upload' | 'demo';
   aangemaakt: string;
+  grid: ScanCel[];
   totalen: {
     klanten: number;
     polissen: number;
@@ -74,5 +80,5 @@ export const api = {
   exportUrl: (scanId: string) => `/api/scans/${scanId}/leads.csv`,
 };
 
-export const euro = (n: number) =>
-  n.toLocaleString('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+// Zelfde notatie als op de website: €24.600 (zonder spatie).
+export const euro = (n: number) => `€${Math.round(n).toLocaleString('nl-NL')}`;

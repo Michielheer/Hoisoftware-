@@ -1,53 +1,71 @@
-/* Leaklight — design-tokens overgenomen van de House of Intelligence-website:
-   licht cloud-wit canvas, witte kaarten, één periwinkle accent; coral = lek
-   gevonden, mint = gedekt. Pill-buttons en violet-getinte schaduwen. */
+/* Leaklight — design-systeem één-op-één overgenomen van de House of
+   Intelligence-website (Langgraph-repo, src/styles/global.css):
+   licht cloud-wit canvas, witte kaarten, één periwinkle accent voor alle
+   interactieve momenten; coral = lek gevonden, mint = gedekt.
+   Pill-buttons (9999px), 16px kaartranden, violet-getinte schaduwen. */
 
 :root {
   --periwinkle: #576cdb;
   --periwinkle-deep: #4a5cc4;
   --indigo-ink: #1f1f47;
   --storm: #3d3d5c;
+  --slate: #575775;
   --fog: #626d88;
+  --ash: #84849a;
+  --ink: #171a1c;
   --cloud: #f9f9fb;
   --paper: #ffffff;
   --mist: #eaedf6;
+  --haze: #d1d6e1;
+  --bone: #e3e6e8;
   --lilac: #d6dbf5;
   --periwinkle-mist: #c1c9f6;
+  --sky-tint: #abb6ed;
   --coral: #f25a5a;
   --coral-blush: #f7d4d4;
   --mint: #a6f2d2;
   --mint-veil: #c1f6e0;
   --mint-deep: #2f8f6b;
-  --bone: #e3e6e8;
-  --shadow-float: rgba(73, 46, 107, 0.14) 0px 3px 16px 0px;
+  --brand-mint: #74dfb4;
+
   --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, sans-serif;
+
+  /* Violet-getinte schaduwen (nooit neutraal grijs) */
+  --shadow-float: rgba(73, 46, 107, 0.14) 0px 3px 16px 0px;
+  --shadow-hero: rgba(71, 92, 133, 0.25) 0px 4px 20px 0px, rgba(144, 138, 208, 0.1) 0px 30px 60px 0px;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   background: var(--cloud);
-  color: var(--storm);
+  color: var(--ink);
   font-family: var(--font-body);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3,
-button,
-.display {
+.font-display {
   font-family: var(--font-display);
-  color: var(--indigo-ink);
 }
 
 ::selection {
   background: var(--periwinkle-mist);
   color: var(--indigo-ink);
+}
+
+a,
+button,
+[role='button'] {
+  cursor: pointer;
 }
 
 :focus-visible {
@@ -56,90 +74,19 @@ button,
   border-radius: 4px;
 }
 
-.shell {
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px 96px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
-/* ---------- Topbalk ---------- */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 22px 0;
-}
-
-.brand {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.brand .logo {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--indigo-ink);
-}
-
-.brand .logo .accent {
-  color: var(--periwinkle);
-}
-
-.brand .sub {
-  font-size: 0.8rem;
-  color: var(--fog);
-}
-
-/* ---------- Knoppen (pills, zoals op de site) ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  border-radius: 9999px;
-  padding: 12px 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.btn-primary {
-  background: var(--periwinkle);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: var(--periwinkle-deep);
-}
-
-.btn-secondary {
-  background: var(--paper);
-  color: var(--indigo-ink);
-  border: 1px solid var(--mist);
-}
-
-.btn-secondary:hover {
-  border-color: var(--lilac);
-  box-shadow: var(--shadow-float);
-}
-
-.btn:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-/* ---------- Startscherm ---------- */
-.hero {
-  text-align: center;
-  max-width: 720px;
-  margin: 48px auto 40px;
-}
-
+/* ---------- Typografie-patronen van de site ---------- */
 .kicker {
   font-family: var(--font-display);
   font-size: 13px;
@@ -147,59 +94,449 @@ button,
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--periwinkle-deep);
+  margin: 0;
 }
 
-.hero h1 {
-  margin: 14px 0 0;
-  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--indigo-ink);
+  margin: 0;
+}
+
+.display-xl {
+  font-size: clamp(2.5rem, 5.4vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+}
+
+.display-lg {
+  font-size: clamp(2rem, 3.6vw, 3rem);
   font-weight: 300;
   line-height: 1.08;
   letter-spacing: -0.03em;
 }
 
-.hero p {
-  margin-top: 18px;
-  font-size: 1.1rem;
-  line-height: 1.6;
+.lede {
+  font-size: 1.125rem;
+  line-height: 1.625;
   color: var(--storm);
 }
 
-.start-grid {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  max-width: 860px;
-  margin: 0 auto;
+/* ---------- Primaire pill: het enige chromatische vlak ---------- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--periwinkle);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 14px 28px;
+  transition: background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
 }
 
+.btn-primary:hover {
+  background: var(--periwinkle-deep);
+  box-shadow: var(--shadow-float);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.btn-primary.klein {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+}
+
+/* Ghost text-link: voorkeurspatroon voor secundaire acties */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--periwinkle-deep);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: gap 200ms ease;
+}
+
+.btn-ghost:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.btn-ghost svg {
+  transition: transform 200ms ease;
+}
+
+.btn-ghost:hover svg {
+  transform: translateX(2px);
+}
+
+/* Segmented control (zoals Particulier / Zakelijk op de site) */
+.seg-groep {
+  display: inline-flex;
+  border: 1px solid var(--mist);
+  background: var(--paper);
+  border-radius: 9999px;
+  padding: 4px;
+}
+
+.seg-btn {
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  padding: 0.55rem 1.4rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--slate);
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.seg-btn[aria-pressed='true'] {
+  background: var(--periwinkle);
+  color: #ffffff;
+}
+
+/* ---------- Kaarten ---------- */
 .card {
   background: var(--paper);
   border: 1px solid var(--mist);
   border-radius: 16px;
   padding: 32px;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
 }
 
-.card h2 {
-  margin: 0 0 8px;
-  font-size: 1.3rem;
+.card.hoverbaar:hover {
+  border-color: var(--lilac);
+  box-shadow: var(--shadow-float);
+}
+
+.card-hero {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-hero);
+}
+
+/* 3D-tilt op kaarten (JS zet de custom properties) */
+.tilt {
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  will-change: transform;
+}
+
+/* Scroll-reveal: alleen verbergen als JS draait */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+html.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Puls-dot in de live-scan-kaart */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(87, 108, 219, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(87, 108, 219, 0);
+  }
+}
+
+.pulse-dot {
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+  border-radius: 9999px;
+  background: var(--periwinkle);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* ---------- Nav (sticky, paper/90 + blur, zoals de site) ---------- */
+.nav-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--mist);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.nav {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-brand svg {
+  height: 32px;
+  width: 32px;
+}
+
+.nav-brand .naam {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--indigo-ink);
+}
+
+.nav-brand .naam u {
+  text-decoration-color: var(--periwinkle);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.nav-rechts {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-label {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  color: rgba(31, 31, 71, 0.8);
+}
+
+@media (max-width: 640px) {
+  .nav-label {
+    display: none;
+  }
+}
+
+/* ---------- Hero (startscherm) ---------- */
+.hero-grid {
+  display: grid;
+  gap: 56px;
+  align-items: center;
+  padding-top: 64px;
+  padding-bottom: 80px;
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    padding-top: 96px;
+    padding-bottom: 112px;
+  }
+}
+
+.hero-kop {
+  margin-top: 20px;
+}
+
+.hero-tekst {
+  margin-top: 24px;
+  max-width: 36rem;
+}
+
+.hero-acties {
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .hero-acties {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.hero-voetnoot {
+  margin-top: 48px;
+  border-top: 1px solid var(--mist);
+  padding-top: 24px;
+  font-size: 0.875rem;
+  color: var(--fog);
+}
+
+/* Live-scan-kaart (signatuurelement van de site) */
+.scan-kop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scan-titel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--slate);
+  margin: 0;
+}
+
+.scan-stage {
+  position: relative;
+  margin-top: 16px;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--cloud);
+}
+
+.scan-stage canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.scan-stats {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  border-top: 1px solid var(--mist);
+  padding-top: 20px;
+}
+
+.scan-stats .waarde {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--indigo-ink);
+  margin: 0;
+}
+
+.scan-stats .label {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--fog);
+}
+
+.scan-voetnoot {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--fog);
+}
+
+.legenda {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 24px;
+  row-gap: 8px;
+  border-top: 1px solid var(--mist);
+  padding-top: 16px;
+  font-size: 13px;
+  color: var(--fog);
+}
+
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legenda .blok {
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+  border-radius: 3px;
+}
+
+.legenda .lijn {
+  display: inline-block;
+  height: 3px;
+  width: 16px;
+  border-radius: 2px;
+}
+
+/* ---------- Secties (dashboard) ---------- */
+.sectie {
+  padding-top: 56px;
+}
+
+.sectie-kop {
+  max-width: 42rem;
+}
+
+.sectie-kop h2 {
+  margin-top: 16px;
+}
+
+.sectie-kop .lede {
+  margin-top: 20px;
+}
+
+/* Upload-kaarten */
+.start-grid {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+@media (min-width: 768px) {
+  .start-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card h3 {
+  font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
 
-.card p {
-  margin: 0 0 20px;
-  line-height: 1.55;
+.card .toelichting {
+  margin: 10px 0 20px;
+  line-height: 1.625;
   color: var(--storm);
 }
 
 .dropzone {
   border: 2px dashed var(--lilac);
   border-radius: 12px;
-  padding: 28px 20px;
+  padding: 30px 20px;
   text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
   color: var(--fog);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 200ms ease, background 200ms ease;
 }
 
 .dropzone:hover,
@@ -209,18 +546,18 @@ button,
 }
 
 .formaat {
-  margin-top: 28px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--fog);
+  line-height: 1.6;
 }
 
 .formaat code {
   display: block;
-  margin-top: 10px;
-  padding: 14px 16px;
+  margin-top: 12px;
+  padding: 16px;
   background: var(--cloud);
   border: 1px solid var(--mist);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow-x: auto;
   white-space: pre;
   font-size: 0.78rem;
@@ -228,8 +565,7 @@ button,
 }
 
 .fout {
-  margin: 20px auto;
-  max-width: 720px;
+  margin: 24px 0;
   background: var(--coral-blush);
   color: #8f2525;
   border-radius: 12px;
@@ -240,25 +576,24 @@ button,
 .dash-kop {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  margin: 24px 0;
+  gap: 20px;
+  padding-top: 48px;
 }
 
 .dash-kop h1 {
-  margin: 0;
-  font-size: 1.9rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  margin-top: 14px;
 }
 
-.dash-kop .acties {
+.dash-acties {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 20px;
 }
 
 .tegels {
+  margin-top: 36px;
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -268,7 +603,13 @@ button,
   background: var(--paper);
   border: 1px solid var(--mist);
   border-radius: 16px;
-  padding: 22px 24px;
+  padding: 24px;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.tegel:hover {
+  border-color: var(--lilac);
+  box-shadow: var(--shadow-float);
 }
 
 .tegel .label {
@@ -278,12 +619,13 @@ button,
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--fog);
+  margin: 0;
 }
 
 .tegel .waarde {
-  margin-top: 8px;
+  margin: 10px 0 0;
   font-family: var(--font-display);
-  font-size: 1.9rem;
+  font-size: 2rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--indigo-ink);
@@ -294,25 +636,15 @@ button,
 }
 
 /* Verdeling per lek-type */
-.verdeling {
-  margin-top: 24px;
-}
-
-.verdeling h2,
-.sectie h2 {
-  font-size: 1.15rem;
-  font-weight: 500;
-  margin: 0 0 16px;
-}
-
 .balk-rij {
   display: grid;
-  grid-template-columns: minmax(160px, 220px) 1fr auto auto;
+  grid-template-columns: minmax(170px, 240px) 1fr auto auto;
   align-items: center;
-  gap: 14px;
-  padding: 9px 0;
+  gap: 16px;
+  padding: 11px 0;
   border-bottom: 1px solid var(--mist);
   font-size: 0.9rem;
+  color: var(--storm);
 }
 
 .balk-rij:last-child {
@@ -322,14 +654,14 @@ button,
 .balk-spoor {
   height: 10px;
   background: var(--cloud);
-  border-radius: 999px;
+  border-radius: 9999px;
   overflow: hidden;
 }
 
 .balk {
   height: 100%;
   background: var(--periwinkle);
-  border-radius: 999px;
+  border-radius: 9999px;
 }
 
 .balk-rij .aantal {
@@ -344,11 +676,11 @@ button,
   white-space: nowrap;
 }
 
-/* Badges */
+/* Badges: pastel wash met donkere inkt, zoals LekTypes op de site */
 .badge {
   display: inline-block;
   border-radius: 9999px;
-  padding: 3px 12px;
+  padding: 4px 12px;
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 500;
@@ -378,40 +710,16 @@ button,
   letter-spacing: 0.02em;
 }
 
-/* Filters */
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 28px 0 16px;
+  gap: 12px;
+  margin-top: 40px;
 }
 
-.seg-groep {
-  display: inline-flex;
-  background: var(--paper);
-  border: 1px solid var(--mist);
-  border-radius: 9999px;
-  padding: 4px;
-}
-
-.seg-groep button {
-  border: none;
-  background: transparent;
-  border-radius: 9999px;
-  padding: 7px 16px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--fog);
-  cursor: pointer;
-}
-
-.seg-groep button.actief {
-  background: var(--lilac);
-  color: var(--indigo-ink);
-}
-
-/* Leads-tabel */
+/* Tabel */
 .tabel-wrap {
+  margin-top: 20px;
   background: var(--paper);
   border: 1px solid var(--mist);
   border-radius: 16px;
@@ -422,6 +730,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  color: var(--storm);
 }
 
 th {
@@ -432,19 +741,33 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--fog);
-  padding: 14px 18px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--mist);
   white-space: nowrap;
 }
 
 td {
-  padding: 13px 18px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--mist);
   vertical-align: top;
+  line-height: 1.45;
 }
 
 tr:last-child td {
   border-bottom: none;
+}
+
+tbody tr {
+  transition: background 150ms ease;
+}
+
+tbody tr:hover {
+  background: var(--cloud);
+}
+
+td.premie,
+th.premie {
+  text-align: right;
 }
 
 td.premie {
@@ -452,15 +775,11 @@ td.premie {
   font-weight: 600;
   color: var(--indigo-ink);
   white-space: nowrap;
-  text-align: right;
-}
-
-th.premie {
-  text-align: right;
 }
 
 .klantnaam {
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 500;
   color: var(--indigo-ink);
 }
 
@@ -471,16 +790,15 @@ th.premie {
 
 .omschrijving {
   max-width: 420px;
-  line-height: 1.45;
 }
 
-/* Lek-score klantenlijst */
+/* Lek-score per klant: mint = gedekt, coral = lek (zoals de site) */
 .score-rij {
   display: grid;
-  grid-template-columns: minmax(180px, 260px) 1fr auto;
-  gap: 14px;
+  grid-template-columns: minmax(190px, 280px) 1fr auto;
+  gap: 16px;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--mist);
   font-size: 0.9rem;
 }
@@ -492,14 +810,14 @@ th.premie {
 .score-spoor {
   height: 10px;
   background: var(--mint-veil);
-  border-radius: 999px;
+  border-radius: 9999px;
   overflow: hidden;
 }
 
 .score-balk {
   height: 100%;
   background: var(--coral);
-  border-radius: 999px;
+  border-radius: 9999px;
 }
 
 .score-rij .score {
@@ -510,19 +828,87 @@ th.premie {
   text-align: right;
 }
 
-.sectie {
-  margin-top: 32px;
-}
-
 .leeg {
   padding: 32px;
   text-align: center;
   color: var(--fog);
 }
 
-.voet {
-  margin-top: 48px;
-  text-align: center;
-  font-size: 0.8rem;
+/* ---------- Footer (zoals de site) ---------- */
+.site-footer {
+  margin-top: 96px;
+  border-top: 1px solid var(--mist);
+  background: var(--paper);
+}
+
+.footer-inner {
+  padding-top: 64px;
+  padding-bottom: 64px;
+  display: grid;
+  gap: 40px;
+}
+
+@media (min-width: 768px) {
+  .footer-inner {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-brand svg {
+  height: 36px;
+  width: 36px;
+}
+
+.footer-tagline {
+  margin-top: 20px;
+  max-width: 24rem;
+  line-height: 1.625;
   color: var(--fog);
+}
+
+.footer-meta {
+  font-size: 0.875rem;
+  color: var(--fog);
+  line-height: 1.8;
+}
+
+.footer-meta a {
+  color: var(--periwinkle-deep);
+}
+
+.footer-meta a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .pulse-dot {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

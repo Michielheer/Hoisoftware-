@@ -30,6 +30,20 @@ export const LEK_TYPES = {
 
 const SCORE_GEWICHT = { 'Cross-sell': 24, Upsell: 18, Optimalisatie: 10 };
 
+// Korte labels voor de tegels in de live-scan-visualisatie (zoals op de site).
+const PRODUCT_AFKORTING = {
+  opstal: 'OP',
+  inboedel: 'IN',
+  avp: 'AVP',
+  rechtsbijstand: 'RB',
+  auto: 'AUTO',
+  gebouw: 'GEB',
+  inventaris: 'INV',
+  bedrijfsschade: 'BS',
+  avb: 'AVB',
+  cyber: 'CYB',
+};
+
 const PRODUCT_NAMEN = {
   opstal: 'Opstal',
   inboedel: 'Inboedel',
@@ -253,7 +267,19 @@ export function scanPortefeuille(klanten, opties = {}) {
     .filter((t) => t.aantal > 0)
     .sort((a, b) => b.geschatteJaarpremie - a.geschatteJaarpremie);
 
+  // Eén tegel per gescande polis voor de live-scan-visualisatie:
+  // coral als er op die productlijn een lek zit, anders mint.
+  const grid = klanten.flatMap((klant) => {
+    const resultaat = resultaatKlanten.find((k) => k.klantId === klant.klantId);
+    const lekLijnen = new Set(resultaat.leks.map((l) => l.productlijn));
+    return klant.polissen.map((p) => ({
+      label: PRODUCT_AFKORTING[p.productlijn] ?? (p.productlijn || '?').slice(0, 3).toUpperCase(),
+      leak: lekLijnen.has(p.productlijn),
+    }));
+  });
+
   return {
+    grid,
     totalen: {
       klanten: klanten.length,
       polissen: klanten.reduce((s, k) => s + k.polissen.length, 0),
