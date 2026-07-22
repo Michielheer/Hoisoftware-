@@ -42,11 +42,23 @@ export interface ScanCel {
   leak: boolean;
 }
 
+export interface DekkingCategorie {
+  lijn: string;
+  code: string;
+  naam: string;
+  actueel: number;
+  norm: number;
+  toereikend: number;
+  vereist: number;
+  totaal: number;
+}
+
 export interface ScanResultaat {
   scanId: string;
   bron: 'upload' | 'demo';
   aangemaakt: string;
   grid: ScanCel[];
+  dekkingZakelijk: DekkingCategorie[];
   totalen: {
     klanten: number;
     polissen: number;
@@ -78,6 +90,8 @@ export const api = {
   scanDemo: () => fetch('/api/scan/demo', { method: 'POST' }).then((r) => handle<ScanResultaat>(r)),
 
   exportUrl: (scanId: string) => `/api/scans/${scanId}/leads.csv`,
+
+  briefUrl: (scanId: string, klantId: string) => `/api/scans/${scanId}/klanten/${klantId}/brief`,
 };
 
 // Zelfde notatie als op de website: €24.600 (zonder spatie).

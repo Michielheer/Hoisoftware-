@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { api, euro, Kans, ScanResultaat, Segment } from '../api';
+import CoverageBars from './CoverageBars';
 import ScanCanvas from './ScanCanvas';
 
 type SegmentFilter = 'alle' | Segment;
@@ -149,6 +150,67 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
         </div>
       </section>
 
+      {/* Zakelijk: dekking t.o.v. het normprofiel per SBI (Analyse-sectie van de site) */}
+      {scan.dekkingZakelijk.length > 0 && (
+        <section className="container sectie analyse-grid">
+          <div className="reveal">
+            <p className="kicker">Analyse · zakelijk</p>
+            <h2 className="display-lg" style={{ marginTop: 16 }}>
+              Dekking naast het normprofiel per branche.
+            </h2>
+            <p className="lede" style={{ marginTop: 20 }}>
+              Voor bedrijven bepalen we het normprofiel op basis van de SBI-code. De periwinkle lijn
+              is de norm: het deel van je zakelijke klanten dat deze dekking volgens hun branche
+              hoort te hebben. Mint is wat er nu toereikend gedekt is — coral is het tekort, en dus
+              de kans.
+            </p>
+            <ul className="dekking-lijst">
+              {[...scan.dekkingZakelijk]
+                .sort((a, b) => b.norm - b.actueel - (a.norm - a.actueel))
+                .slice(0, 3)
+                .filter((d) => d.norm > d.actueel)
+                .map((d) => (
+                  <li key={d.lijn}>
+                    <span className="klantnaam">{d.naam}</span>
+                    <br />
+                    <span className="klantid">
+                      {d.toereikend} van de {d.vereist} klanten die het nodig hebben zijn toereikend
+                      gedekt.
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </div>
+
+          <div className="card-hero tilt reveal">
+            <div className="scan-kop">
+              <p className="scan-titel">
+                <span className="pulse-dot" aria-hidden="true" />
+                Normprofiel per SBI-code
+              </p>
+            </div>
+            <div
+              className="scan-stage"
+              role="img"
+              aria-label="Staafdiagram: per categorie de huidige dekking in mint, met een coral kap voor het tekort tot het normprofiel en een periwinkle lijn op de norm."
+            >
+              <CoverageBars categorieen={scan.dekkingZakelijk} />
+            </div>
+            <div className="legenda">
+              <span>
+                <span className="blok" style={{ background: 'var(--mint)' }} /> Huidige dekking
+              </span>
+              <span>
+                <span className="blok" style={{ background: 'var(--coral)' }} /> Tekort t.o.v. norm
+              </span>
+              <span>
+                <span className="lijn" style={{ background: 'var(--periwinkle)' }} /> Normprofiel
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Waar zit de omzet */}
       <section className="container sectie">
         <div className="sectie-kop reveal">
@@ -265,7 +327,21 @@ export default function Dashboard({ scan, onNieuweScan }: Props) {
                 <div className="score-spoor">
                   <div className="score-balk" style={{ width: `${k.lekScore}%` }} />
                 </div>
-                <span className="score">{k.lekScore}</span>
+                <span className="score-acties">
+                  <span className="score">{k.lekScore}</span>
+                  <a
+                    className="btn-ghost"
+                    style={{ fontSize: 13 }}
+                    href={api.briefUrl(scan.scanId, k.klantId)}
+                    download
+                    title={`Conceptbrief voor ${k.klantNaam} downloaden`}
+                  >
+                    conceptbrief
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" />
+                    </svg>
+                  </a>
+                </span>
               </div>
             ))
           )}

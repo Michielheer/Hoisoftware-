@@ -828,6 +828,42 @@ td.premie {
   text-align: right;
 }
 
+.score-acties {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+/* Analyse-sectie: tekst links, visualisatie rechts (zoals de site) */
+.analyse-grid {
+  display: grid;
+  gap: 40px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .analyse-grid {
+    grid-template-columns: 1fr 1.1fr;
+    gap: 56px;
+  }
+}
+
+.dekking-lijst {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dekking-lijst li {
+  border-left: 3px solid var(--coral);
+  padding-left: 16px;
+  line-height: 1.5;
+}
+
 .leeg {
   padding: 32px;
   text-align: center;

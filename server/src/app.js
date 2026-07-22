@@ -2,6 +2,7 @@ import express from 'express';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { maakBrief } from './brief.js';
 import { leadsNaarCsv, parsePortefeuille } from './csv.js';
 import { demoPortefeuille } from './demo.js';
 import { scanPortefeuille } from './scanner.js';
@@ -51,6 +52,20 @@ export function createApp() {
       .type('text/csv; charset=utf-8')
       .set('Content-Disposition', 'attachment; filename="leaklight-leads.csv"')
       .send(leadsNaarCsv(scan.leads));
+  });
+
+  app.get('/api/scans/:id/klanten/:klantId/brief', (req, res) => {
+    const scan = scans.get(req.params.id);
+    if (!scan) return res.status(404).json({ error: 'Scan niet gevonden.' });
+    const klant = scan.klanten.find((k) => k.klantId === req.params.klantId);
+    if (!klant) return res.status(404).json({ error: 'Klant niet gevonden in deze scan.' });
+    if (klant.leks.length === 0) {
+      return res.status(400).json({ error: 'Deze klant heeft geen leks; er is geen brief nodig.' });
+    }
+    res
+      .type('text/plain; charset=utf-8')
+      .set('Content-Disposition', `attachment; filename="migratiebrief-${klant.klantId}.txt"`)
+      .send(maakBrief(klant, scan.aangemaakt));
   });
 
   // In productie serveert de server ook de gebouwde frontend.

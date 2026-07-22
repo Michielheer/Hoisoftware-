@@ -58,3 +58,21 @@ test('CSV-upload wordt gescand, ongeldige invoer geeft 400', async (t) => {
   res = await fetch(`${base}/api/scans/bestaat-niet/leads.csv`);
   assert.equal(res.status, 404);
 });
+
+test('migratiebrief per klant via de API', async (t) => {
+  const { server, base } = await makeServer();
+  t.after(() => server.close());
+
+  const scan = await (await fetch(`${base}/api/scan/demo`, { method: 'POST' })).json();
+  const metLek = scan.klanten.find((k) => k.leks.length > 0);
+
+  const res = await fetch(`${base}/api/scans/${scan.scanId}/klanten/${metLek.klantId}/brief`);
+  assert.equal(res.status, 200);
+  const brief = await res.text();
+  assert.match(brief, new RegExp(metLek.klantNaam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(brief, /Met vriendelijke groet/);
+  assert.match(brief, /1\. /);
+
+  const nietGevonden = await fetch(`${base}/api/scans/${scan.scanId}/klanten/bestaat-niet/brief`);
+  assert.equal(nietGevonden.status, 404);
+});

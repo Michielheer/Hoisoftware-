@@ -122,3 +122,38 @@ test('demo-portefeuille is deterministisch en bevat leks', () => {
   assert.ok(a.totalen.leks > 20, `verwacht ruim voldoende leks, kreeg ${a.totalen.leks}`);
   assert.ok(a.totalen.geschatteJaarpremie > 0);
 });
+
+test('dekkingZakelijk berekent norm en actuele dekking per categorie', () => {
+  const r = scanPortefeuille(
+    [
+      klant({
+        klantId: 'Z1',
+        segment: 'zakelijk',
+        sbiCode: '6201',
+        polissen: [polis('avb'), polis('rechtsbijstand', { polisnummer: 'P2' })],
+      }),
+      klant({
+        klantId: 'Z2',
+        segment: 'zakelijk',
+        sbiCode: '5630',
+        polissen: [polis('avb'), polis('gebouw', { polisnummer: 'P2', verzekerdeSom: 500000, actueleWaarde: 500000 })],
+      }),
+    ],
+    { vandaag: VANDAAG },
+  );
+  const cyber = r.dekkingZakelijk.find((d) => d.lijn === 'cyber');
+  // Cyber vereist voor 1 van 2 klanten (IT), niemand heeft het.
+  assert.equal(cyber.norm, 0.5);
+  assert.equal(cyber.actueel, 0);
+  const avb = r.dekkingZakelijk.find((d) => d.lijn === 'avb');
+  assert.equal(avb.norm, 1);
+  assert.equal(avb.actueel, 1);
+});
+
+test('particuliere portefeuille heeft geen dekkingZakelijk', () => {
+  const r = scanPortefeuille(
+    [klant({ polissen: [polis('auto')] })],
+    { vandaag: VANDAAG },
+  );
+  assert.deepEqual(r.dekkingZakelijk, []);
+});

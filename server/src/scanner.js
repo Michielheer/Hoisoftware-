@@ -278,8 +278,42 @@ export function scanPortefeuille(klanten, opties = {}) {
     }));
   });
 
+  // Dekking t.o.v. het normprofiel per zakelijke categorie, voor het
+  // staafdiagram uit de Analyse-sectie van de site: mint = huidige dekking,
+  // coral = tekort tot de norm, periwinkle lijn = normprofiel.
+  const zakelijk = klanten.filter((k) => k.segment === 'zakelijk');
+  const dekkingZakelijk = [];
+  if (zakelijk.length > 0) {
+    for (const lijn of ['gebouw', 'inventaris', 'bedrijfsschade', 'avb', 'rechtsbijstand', 'cyber']) {
+      let vereist = 0;
+      let toereikend = 0;
+      for (const klant of zakelijk) {
+        if (sbiProfiel(klant.sbiCode).vereist.includes(lijn)) vereist += 1;
+        const resultaat = resultaatKlanten.find((k) => k.klantId === klant.klantId);
+        const heeftLijn = klant.polissen.some((p) => p.productlijn === lijn);
+        const onderverzekerd = resultaat.leks.some(
+          (l) => l.type === 'onderverzekering' && l.productlijn === lijn,
+        );
+        if (heeftLijn && !onderverzekerd) toereikend += 1;
+      }
+      if (vereist > 0) {
+        dekkingZakelijk.push({
+          lijn,
+          code: PRODUCT_AFKORTING[lijn],
+          naam: PRODUCT_NAMEN[lijn],
+          actueel: toereikend / zakelijk.length,
+          norm: vereist / zakelijk.length,
+          toereikend,
+          vereist,
+          totaal: zakelijk.length,
+        });
+      }
+    }
+  }
+
   return {
     grid,
+    dekkingZakelijk,
     totalen: {
       klanten: klanten.length,
       polissen: klanten.reduce((s, k) => s + k.polissen.length, 0),

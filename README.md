@@ -14,7 +14,12 @@ upsell-leads. De applicatie achter de website van House of Intelligence B.V.
      bedrijfsschade, AVB, rechtsbijstand, cyber).
 3. **Leads eruit** — per klant: welk gat, welk product, welke geschatte
    jaarpremie. Dashboard met lek-scores en verdeling per lek-type, plus een
-   CSV-export klaar voor de migratiebrief of het CRM.
+   CSV-export klaar voor het CRM en een kant-en-klare conceptbrief
+   (migratiebrief) per klant.
+
+Het dashboard bevat de twee visualisaties van de website, gekoppeld aan echte
+data: de live-scan (elke tegel een gescande polis; coral = lek, mint = gedekt)
+en het zakelijke staafdiagram met de dekking naast het normprofiel per SBI.
 
 ### De lek-types
 
@@ -81,6 +86,7 @@ Verplichte kolommen: `klant_id`, `klant_naam`, `segment`, `polisnummer`,
 | POST | `/api/scan` | Scan een CSV (raw `text/csv`-body of JSON `{ "csv": "..." }`) |
 | POST | `/api/scan/demo` | Scan de demo-portefeuille |
 | GET | `/api/scans/:id/leads.csv` | Exporteer de leads van een scan als CSV |
+| GET | `/api/scans/:id/klanten/:klantId/brief` | Conceptbrief (migratiebrief) voor één klant |
 
 ## Tests
 
