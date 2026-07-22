@@ -269,16 +269,38 @@ export function scanPortefeuille(klanten, opties = {}) {
     .filter((t) => t.aantal > 0)
     .sort((a, b) => b.geschatteJaarpremie - a.geschatteJaarpremie);
 
+  // Lek-productlijnen per klant één keer indexeren, zodat grid en
+  // dekkingZakelijk in O(n) blijven — ook bij portefeuilles van tienduizenden
+  // polissen.
+  const lekLijnenPerKlant = new Map(
+    resultaatKlanten.map((k) => [k.klantId, new Set(k.leks.map((l) => l.productlijn))]),
+  );
+  const onderverzekerdPerKlant = new Map(
+    resultaatKlanten.map((k) => [
+      k.klantId,
+      new Set(k.leks.filter((l) => l.type === 'onderverzekering').map((l) => l.productlijn)),
+    ]),
+  );
+
   // Eén tegel per gescande polis voor de live-scan-visualisatie:
-  // coral als er op die productlijn een lek zit, anders mint.
-  const grid = klanten.flatMap((klant) => {
-    const resultaat = resultaatKlanten.find((k) => k.klantId === klant.klantId);
-    const lekLijnen = new Set(resultaat.leks.map((l) => l.productlijn));
+  // coral als er op die productlijn een lek zit, anders mint. Boven de
+  // MAX_GRID_CELLEN tonen we een gelijkmatige steekproef, zodat de payload en
+  // de canvas-animatie klein blijven; de frontend meldt dat dan.
+  const alleCellen = klanten.flatMap((klant) => {
+    const lekLijnen = lekLijnenPerKlant.get(klant.klantId);
     return klant.polissen.map((p) => ({
       label: PRODUCT_AFKORTING[p.productlijn] ?? (p.productlijn || '?').slice(0, 3).toUpperCase(),
       leak: lekLijnen.has(p.productlijn),
     }));
   });
+  const MAX_GRID_CELLEN = 480;
+  const grid =
+    alleCellen.length <= MAX_GRID_CELLEN
+      ? alleCellen
+      : Array.from(
+          { length: MAX_GRID_CELLEN },
+          (_, i) => alleCellen[Math.floor((i * alleCellen.length) / MAX_GRID_CELLEN)],
+        );
 
   // Dekking t.o.v. het normprofiel per zakelijke categorie, voor het
   // staafdiagram uit de Analyse-sectie van de site: mint = huidige dekking,
@@ -286,27 +308,28 @@ export function scanPortefeuille(klanten, opties = {}) {
   const zakelijk = klanten.filter((k) => k.segment === 'zakelijk');
   const dekkingZakelijk = [];
   if (zakelijk.length > 0) {
-    for (const lijn of ['gebouw', 'inventaris', 'bedrijfsschade', 'avb', 'rechtsbijstand', 'cyber']) {
-      let vereist = 0;
-      let toereikend = 0;
-      for (const klant of zakelijk) {
-        if (sbiProfiel(klant.sbiCode).vereist.includes(lijn)) vereist += 1;
-        const resultaat = resultaatKlanten.find((k) => k.klantId === klant.klantId);
-        const heeftLijn = klant.polissen.some((p) => p.productlijn === lijn);
-        const onderverzekerd = resultaat.leks.some(
-          (l) => l.type === 'onderverzekering' && l.productlijn === lijn,
-        );
-        if (heeftLijn && !onderverzekerd) toereikend += 1;
+    const telling = new Map(); // lijn -> { vereist, toereikend }
+    for (const klant of zakelijk) {
+      const profielLijnen = new Set(sbiProfiel(klant.sbiCode).vereist);
+      const eigenLijnen = new Set(klant.polissen.map((p) => p.productlijn));
+      const onderverzekerd = onderverzekerdPerKlant.get(klant.klantId);
+      for (const lijn of ['gebouw', 'inventaris', 'bedrijfsschade', 'avb', 'rechtsbijstand', 'cyber']) {
+        if (!telling.has(lijn)) telling.set(lijn, { vereist: 0, toereikend: 0 });
+        const t = telling.get(lijn);
+        if (profielLijnen.has(lijn)) t.vereist += 1;
+        if (eigenLijnen.has(lijn) && !onderverzekerd.has(lijn)) t.toereikend += 1;
       }
-      if (vereist > 0) {
+    }
+    for (const [lijn, t] of telling) {
+      if (t.vereist > 0) {
         dekkingZakelijk.push({
           lijn,
           code: PRODUCT_AFKORTING[lijn],
           naam: PRODUCT_NAMEN[lijn],
-          actueel: toereikend / zakelijk.length,
-          norm: vereist / zakelijk.length,
-          toereikend,
-          vereist,
+          actueel: t.toereikend / zakelijk.length,
+          norm: t.vereist / zakelijk.length,
+          toereikend: t.toereikend,
+          vereist: t.vereist,
           totaal: zakelijk.length,
         });
       }

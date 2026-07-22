@@ -2,7 +2,7 @@
 // Zo overleeft een scan de browsersessie en kan het conversieproject laten
 // zien wat het belooft: geschatte omzet naast gerealiseerde omzet.
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 export const LEAD_STATUSSEN = ['nieuw', 'benaderd', 'offerte', 'gesloten', 'afgewezen'];
@@ -27,6 +27,7 @@ export class ScanStore {
   constructor(filePath) {
     this.filePath = filePath;
     this.scans = [];
+    this.schrijfKetting = Promise.resolve();
   }
 
   async load() {
@@ -38,9 +39,16 @@ export class ScanStore {
     }
   }
 
-  async save() {
-    await mkdir(path.dirname(this.filePath), { recursive: true });
-    await writeFile(this.filePath, JSON.stringify(this.scans));
+  // Atomair (tmp-bestand + rename) en geserialiseerd: gelijktijdige
+  // status-updates kunnen het databestand nooit half of door elkaar schrijven.
+  save() {
+    this.schrijfKetting = this.schrijfKetting.then(async () => {
+      const tmp = `${this.filePath}.tmp`;
+      await mkdir(path.dirname(this.filePath), { recursive: true });
+      await writeFile(tmp, JSON.stringify(this.scans));
+      await rename(tmp, this.filePath);
+    });
+    return this.schrijfKetting;
   }
 
   async voegToe(scan) {

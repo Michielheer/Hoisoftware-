@@ -44,13 +44,24 @@ function getal(waarde) {
   return Number.isFinite(n) ? n : null;
 }
 
-export function parsePortefeuille(csvTekst) {
+// Bovengrens op de invoer: voorkomt dat één upload de server het geheugen
+// uit drukt. 100.000 polissen is ruim boven een reële volmachtportefeuille.
+const MAX_RIJEN = 100_000;
+const MAX_VELDLENGTE = 200;
+
+const kort = (waarde) => (waarde ?? '').slice(0, MAX_VELDLENGTE);
+
+export function parsePortefeuille(csvTekst, opties = {}) {
+  const maxRijen = opties.maxRijen ?? MAX_RIJEN;
   const regels = csvTekst
     .split(/\r?\n/)
     .map((r) => r.trim())
     .filter((r) => r.length > 0);
   if (regels.length < 2) {
     throw new Error('Het CSV-bestand bevat geen datarijen.');
+  }
+  if (regels.length - 1 > maxRijen) {
+    throw new Error(`Het CSV-bestand heeft meer dan ${maxRijen.toLocaleString('nl-NL')} rijen; splits de portefeuille op.`);
   }
 
   const scheider = (regels[0].match(/;/g)?.length ?? 0) >= (regels[0].match(/,/g)?.length ?? 0) ? ';' : ',';
@@ -66,27 +77,27 @@ export function parsePortefeuille(csvTekst) {
     const velden = splitsRegel(regels[i], scheider);
     const rij = Object.fromEntries(kop.map((k, j) => [k, velden[j] ?? '']));
 
-    const klantId = rij.klant_id;
+    const klantId = kort(rij.klant_id);
     if (!klantId) continue;
 
     if (!klanten.has(klantId)) {
       const segment = rij.segment?.toLowerCase() === 'zakelijk' ? 'zakelijk' : 'particulier';
       klanten.set(klantId, {
         klantId,
-        klantNaam: rij.klant_naam || klantId,
+        klantNaam: kort(rij.klant_naam) || klantId,
         segment,
-        sbiCode: rij.sbi_code || null,
+        sbiCode: kort(rij.sbi_code) || null,
         polissen: [],
       });
     }
 
     klanten.get(klantId).polissen.push({
-      polisnummer: rij.polisnummer || `rij-${i}`,
-      productlijn: rij.productlijn?.toLowerCase() ?? '',
+      polisnummer: kort(rij.polisnummer) || `rij-${i}`,
+      productlijn: kort(rij.productlijn).toLowerCase(),
       verzekerdeSom: getal(rij.verzekerde_som),
       actueleWaarde: getal(rij.actuele_waarde),
       jaarpremie: getal(rij.jaarpremie) ?? 0,
-      laatstGewijzigd: rij.laatst_gewijzigd || null,
+      laatstGewijzigd: kort(rij.laatst_gewijzigd) || null,
     });
   }
 
@@ -97,7 +108,10 @@ export function parsePortefeuille(csvTekst) {
 }
 
 function csvVeld(waarde) {
-  const s = String(waarde ?? '');
+  let s = String(waarde ?? '');
+  // Formule-injectie: Excel voert cellen uit die met =, +, -, @ of een tab
+  // beginnen. Een apostrof ervoor maakt het weer gewone tekst.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[";\n,]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

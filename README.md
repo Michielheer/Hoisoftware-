@@ -99,6 +99,24 @@ Verplichte kolommen: `klant_id`, `klant_naam`, `segment`, `polisnummer`,
 | GET | `/api/scans/:id/klanten/:klantId/brief` | Conceptbrief (migratiebrief) voor één klant |
 | GET | `/api/scans/:id/brieven` | Alle conceptbrieven in één bestand (campagne) |
 
+## Prestaties & beveiliging
+
+- De scan-engine is O(n) en verwerkt ~50.000 polissen in minder dan een halve
+  seconde; de live-scan-visualisatie toont boven de 480 polissen een
+  gelijkmatige steekproef (met melding).
+- API-responses zijn gzip-gecomprimeerd; gehashte frontend-assets worden een
+  jaar gecachet, `index.html` niet. Status-updates sturen alleen de bijgewerkte
+  lead terug, de frontend werkt optimistisch bij.
+- Scans worden atomair weggeschreven (tmp-bestand + rename), zodat het
+  databestand nooit half geschreven raakt.
+- Security-headers op alle responses (CSP, nosniff, frame-deny,
+  referrer-policy), rate limiting per IP (12 scans/min, 600 API-calls/min),
+  invoerlimieten (25 MB, 100.000 rijen, veldlengtes), ontsmette bestandsnamen,
+  bescherming tegen CSV-formule-injectie in exports en centrale
+  foutafhandeling zonder interne details.
+- Draait de server achter een reverse proxy, zet dan `app.set('trust proxy', …)`
+  passend voor die omgeving zodat de rate limiter het echte client-IP ziet.
+
 ## Tests
 
 ```bash

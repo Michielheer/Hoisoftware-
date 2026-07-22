@@ -118,7 +118,7 @@ export const api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
-    }).then((r) => handle<ScanResultaat>(r)),
+    }).then((r) => handle<{ lead: Lead; opvolging: Opvolging }>(r)),
 
   brievenUrl: (scanId: string) => `/api/scans/${scanId}/brieven`,
 

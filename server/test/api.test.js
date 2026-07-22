@@ -98,7 +98,8 @@ test('leadstatus bijwerken, opvolging in de scanlijst en persistentie op schijf'
   });
   assert.equal(res.status, 200);
   const bijgewerkt = await res.json();
-  assert.equal(bijgewerkt.leads.find((l) => l.leadId === lead.leadId).status, 'gesloten');
+  assert.equal(bijgewerkt.lead.status, 'gesloten');
+  assert.equal(bijgewerkt.opvolging.telling.gesloten, 1);
 
   const lijst = await (await fetch(`${base}/api/scans`)).json();
   assert.equal(lijst.length, 1);

@@ -36,10 +36,16 @@ export default function Dashboard({ scan, onScanUpdate, onNieuweScan }: Props) {
   const [status, setStatus] = useState<StatusFilter>('alle');
 
   async function wijzigStatus(leadId: string, nieuweStatus: LeadStatus) {
+    // Optimistisch bijwerken: de tabel reageert direct, de server bevestigt.
+    const vorige = scan;
+    onScanUpdate({
+      ...scan,
+      leads: scan.leads.map((l) => (l.leadId === leadId ? { ...l, status: nieuweStatus } : l)),
+    });
     try {
-      onScanUpdate(await api.zetStatus(scan.scanId, leadId, nieuweStatus));
+      await api.zetStatus(scan.scanId, leadId, nieuweStatus);
     } catch {
-      // Bij een fout blijft de oude status staan; de volgende fetch herstelt de waarheid.
+      onScanUpdate(vorige);
     }
   }
   const [runId, setRunId] = useState(0);
@@ -198,6 +204,11 @@ export default function Dashboard({ scan, onScanUpdate, onNieuweScan }: Props) {
               <span className="lijn" style={{ background: 'var(--periwinkle)' }} /> Scanlijn
             </span>
           </div>
+          {scan.grid.length < scan.totalen.polissen && (
+            <p className="scan-voetnoot" style={{ textAlign: 'center' }}>
+              Weergave: steekproef van {scan.grid.length} van de {scan.totalen.polissen} polissen.
+            </p>
+          )}
         </div>
       </section>
 
